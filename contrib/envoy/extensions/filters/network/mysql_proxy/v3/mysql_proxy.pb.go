@@ -7,7 +7,6 @@
 package mysql_proxyv3
 
 import (
-	_ "github.com/cncf/xds/go/annotations"
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"

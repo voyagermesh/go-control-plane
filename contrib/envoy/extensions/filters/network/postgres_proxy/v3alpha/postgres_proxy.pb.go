@@ -7,7 +7,7 @@
 package v3alpha
 
 import (
-	_ "github.com/cncf/xds/go/annotations"
+	_ "github.com/cncf/xds/go/udpa/annotations"
 	v3 "github.com/envoyproxy/go-control-plane/envoy/config/trace/v3"
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

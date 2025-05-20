@@ -82,6 +82,8 @@ const (
 	MySQLProxy = "envoy.filters.network.mysql_proxy"
 	// MSSQLServer network filter
 	MSSQLServerProxy = "envoy.filters.network.mssql_proxy"
+	// Oracle network filter
+	OracleProxy = "envoy.filters.network.oracle_proxy"
 	// ExternalAuthorization network filter
 	ExternalAuthorization = "envoy.filters.network.ext_authz"
 	// RoleBasedAccessControl network filter

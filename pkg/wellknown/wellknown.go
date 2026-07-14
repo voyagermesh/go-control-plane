@@ -80,6 +80,12 @@ const (
 	RedisProxy = "envoy.filters.network.redis_proxy"
 	// MySQLProxy network filter.
 	MySQLProxy = "envoy.filters.network.mysql_proxy"
+	// PostgresProxy network filter.
+	PostgresProxy = "envoy.filters.network.postgres_proxy"
+	// OracleProxy network filter.
+	OracleProxy = "envoy.filters.network.oracle_proxy"
+	// MSSQLProxy network filter.
+	MSSQLProxy = "envoy.filters.network.mssql_proxy"
 	// ExternalAuthorization network filter.
 	ExternalAuthorization = "envoy.filters.network.ext_authz"
 	// RoleBasedAccessControl network filter.

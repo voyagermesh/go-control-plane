@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        (unknown)
-// source: postgres_proxy.proto
+// source: contrib/envoy/extensions/filters/network/postgres_proxy/v3alpha/postgres_proxy.proto
 
 package v3alpha
 
@@ -71,11 +71,11 @@ func (x PostgresProxy_SSLMode) String() string {
 }
 
 func (PostgresProxy_SSLMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_postgres_proxy_proto_enumTypes[0].Descriptor()
+	return file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_enumTypes[0].Descriptor()
 }
 
 func (PostgresProxy_SSLMode) Type() protoreflect.EnumType {
-	return &file_postgres_proxy_proto_enumTypes[0]
+	return &file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_enumTypes[0]
 }
 
 func (x PostgresProxy_SSLMode) Number() protoreflect.EnumNumber {
@@ -84,10 +84,71 @@ func (x PostgresProxy_SSLMode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use PostgresProxy_SSLMode.Descriptor instead.
 func (PostgresProxy_SSLMode) EnumDescriptor() ([]byte, []int) {
-	return file_postgres_proxy_proto_rawDescGZIP(), []int{0, 0}
+	return file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescGZIP(), []int{0, 0}
 }
 
-// [#next-free-field: 6]
+type PostgresProxy_MaskingRule_Type int32
+
+const (
+	// Replace every byte of the field value with the mask character.
+	// Length-preserving — mutates in place.
+	PostgresProxy_MaskingRule_FULL PostgresProxy_MaskingRule_Type = 0
+	// Replace every byte EXCEPT the last “show_last“ with the mask
+	// character. If “show_last“ >= field length, the rule is skipped
+	// for that field (it would reveal more than the original).
+	// Length-preserving — mutates in place.
+	PostgresProxy_MaskingRule_PARTIAL PostgresProxy_MaskingRule_Type = 1
+	// Replace the field value with the 64-character lower-case hex
+	// SHA-256 of the original bytes. **Length-changing** — the filter
+	// rewrites the DataRow with a recomputed length prefix. Useful when
+	// a downstream consumer needs a stable surrogate for the same
+	// input value across rows (joins, dedup) without seeing the
+	// original. Output is always 64 bytes regardless of input size.
+	PostgresProxy_MaskingRule_HASH PostgresProxy_MaskingRule_Type = 2
+)
+
+// Enum value maps for PostgresProxy_MaskingRule_Type.
+var (
+	PostgresProxy_MaskingRule_Type_name = map[int32]string{
+		0: "FULL",
+		1: "PARTIAL",
+		2: "HASH",
+	}
+	PostgresProxy_MaskingRule_Type_value = map[string]int32{
+		"FULL":    0,
+		"PARTIAL": 1,
+		"HASH":    2,
+	}
+)
+
+func (x PostgresProxy_MaskingRule_Type) Enum() *PostgresProxy_MaskingRule_Type {
+	p := new(PostgresProxy_MaskingRule_Type)
+	*p = x
+	return p
+}
+
+func (x PostgresProxy_MaskingRule_Type) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PostgresProxy_MaskingRule_Type) Descriptor() protoreflect.EnumDescriptor {
+	return file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_enumTypes[1].Descriptor()
+}
+
+func (PostgresProxy_MaskingRule_Type) Type() protoreflect.EnumType {
+	return &file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_enumTypes[1]
+}
+
+func (x PostgresProxy_MaskingRule_Type) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PostgresProxy_MaskingRule_Type.Descriptor instead.
+func (PostgresProxy_MaskingRule_Type) EnumDescriptor() ([]byte, []int) {
+	return file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescGZIP(), []int{0, 1, 0}
+}
+
+// [#next-free-field: 12]
 type PostgresProxy struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The human readable prefix to use when emitting :ref:`statistics
@@ -109,7 +170,7 @@ type PostgresProxy struct {
 	// This field is deprecated.
 	// Please use :ref:`downstream_ssl <envoy_v3_api_field_extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.downstream_ssl>`.
 	//
-	// Deprecated: Marked as deprecated in postgres_proxy.proto.
+	// Deprecated: Marked as deprecated in contrib/envoy/extensions/filters/network/postgres_proxy/v3alpha/postgres_proxy.proto.
 	TerminateSsl bool `protobuf:"varint,3,opt,name=terminate_ssl,json=terminateSsl,proto3" json:"terminate_ssl,omitempty"`
 	// Controls whether to establish upstream SSL connection to the server.
 	// Envoy will try to establish upstream SSL connection to the server only when
@@ -126,14 +187,40 @@ type PostgresProxy struct {
 	// Defaults to “DISABLE“.
 	DownstreamSsl PostgresProxy_SSLMode `protobuf:"varint,5,opt,name=downstream_ssl,json=downstreamSsl,proto3,enum=envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy_SSLMode" json:"downstream_ssl,omitempty"`
 	// Not sure just commenting because of error
-	AuditLog      *v3.Tracing_Http `protobuf:"bytes,6,opt,name=audit_log,json=auditLog,proto3" json:"audit_log,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	AuditLog *v3.Tracing_Http `protobuf:"bytes,6,opt,name=audit_log,json=auditLog,proto3" json:"audit_log,omitempty"`
+	// KubeDB-DAM block hook. When non-empty, the filter, on every onData pass,
+	// checks the connection's dynamic metadata under
+	// “envoy.filters.network.postgres_proxy“ for a boolean field with this
+	// name. If the field is present and true, the filter closes the connection
+	// (Postgres clients receive “connection terminated“, equivalent to
+	// pg_terminate_backend()). Intended to be set by a downstream policy filter
+	// (e.g. a CEL/WASM implementation of the DAM policy engine).
+	BlockDecisionMetadataKey string `protobuf:"bytes,7,opt,name=block_decision_metadata_key,json=blockDecisionMetadataKey,proto3" json:"block_decision_metadata_key,omitempty"`
+	// Per-spec §5.3 risk thresholds for the built-in DAM detector pack.
+	// Defaults: alert=50, block=80. A value of 0 leaves the corresponding
+	// “dam_risk_score_above_alert“ / “dam_risk_score_above_block“ counter
+	// unincremented.
+	RiskAlertThreshold uint32                       `protobuf:"varint,8,opt,name=risk_alert_threshold,json=riskAlertThreshold,proto3" json:"risk_alert_threshold,omitempty"`
+	RiskBlockThreshold uint32                       `protobuf:"varint,9,opt,name=risk_block_threshold,json=riskBlockThreshold,proto3" json:"risk_block_threshold,omitempty"`
+	DamPiiPatterns     []*PostgresProxy_PiiPattern  `protobuf:"bytes,10,rep,name=dam_pii_patterns,json=damPiiPatterns,proto3" json:"dam_pii_patterns,omitempty"`
+	DamMaskingRules    []*PostgresProxy_MaskingRule `protobuf:"bytes,11,rep,name=dam_masking_rules,json=damMaskingRules,proto3" json:"dam_masking_rules,omitempty"`
+	// Per-field per-pattern DLP match cap. Postgres “scanDataRow“ walks
+	// every non-NULL field of every DataRow and runs each pattern via
+	// “RE2::FindAndConsume“ so a single field containing multiple PII
+	// occurrences (a comment / JSONB blob / concatenated text) increments
+	// “request.response.pii_count“ by the actual match count. Without a
+	// cap, a pathological field could consume unbounded regex CPU.
+	//
+	// 0 = use the built-in default of 64. A value of 1 reproduces the
+	// v1 per-chunk one-hit semantics (one match per pattern per field).
+	DamDlpMaxHitsPerPattern uint32 `protobuf:"varint,12,opt,name=dam_dlp_max_hits_per_pattern,json=damDlpMaxHitsPerPattern,proto3" json:"dam_dlp_max_hits_per_pattern,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *PostgresProxy) Reset() {
 	*x = PostgresProxy{}
-	mi := &file_postgres_proxy_proto_msgTypes[0]
+	mi := &file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -145,7 +232,7 @@ func (x *PostgresProxy) String() string {
 func (*PostgresProxy) ProtoMessage() {}
 
 func (x *PostgresProxy) ProtoReflect() protoreflect.Message {
-	mi := &file_postgres_proxy_proto_msgTypes[0]
+	mi := &file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -158,7 +245,7 @@ func (x *PostgresProxy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PostgresProxy.ProtoReflect.Descriptor instead.
 func (*PostgresProxy) Descriptor() ([]byte, []int) {
-	return file_postgres_proxy_proto_rawDescGZIP(), []int{0}
+	return file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *PostgresProxy) GetStatPrefix() string {
@@ -175,7 +262,7 @@ func (x *PostgresProxy) GetEnableSqlParsing() *wrapperspb.BoolValue {
 	return nil
 }
 
-// Deprecated: Marked as deprecated in postgres_proxy.proto.
+// Deprecated: Marked as deprecated in contrib/envoy/extensions/filters/network/postgres_proxy/v3alpha/postgres_proxy.proto.
 func (x *PostgresProxy) GetTerminateSsl() bool {
 	if x != nil {
 		return x.TerminateSsl
@@ -204,11 +291,225 @@ func (x *PostgresProxy) GetAuditLog() *v3.Tracing_Http {
 	return nil
 }
 
-var File_postgres_proxy_proto protoreflect.FileDescriptor
+func (x *PostgresProxy) GetBlockDecisionMetadataKey() string {
+	if x != nil {
+		return x.BlockDecisionMetadataKey
+	}
+	return ""
+}
 
-const file_postgres_proxy_proto_rawDesc = "" +
+func (x *PostgresProxy) GetRiskAlertThreshold() uint32 {
+	if x != nil {
+		return x.RiskAlertThreshold
+	}
+	return 0
+}
+
+func (x *PostgresProxy) GetRiskBlockThreshold() uint32 {
+	if x != nil {
+		return x.RiskBlockThreshold
+	}
+	return 0
+}
+
+func (x *PostgresProxy) GetDamPiiPatterns() []*PostgresProxy_PiiPattern {
+	if x != nil {
+		return x.DamPiiPatterns
+	}
+	return nil
+}
+
+func (x *PostgresProxy) GetDamMaskingRules() []*PostgresProxy_MaskingRule {
+	if x != nil {
+		return x.DamMaskingRules
+	}
+	return nil
+}
+
+func (x *PostgresProxy) GetDamDlpMaxHitsPerPattern() uint32 {
+	if x != nil {
+		return x.DamDlpMaxHitsPerPattern
+	}
+	return 0
+}
+
+// KubeDB-DAM PII patterns (spec §5.8 DLP). Each pattern is an RE2 regex
+// applied as a partial match against every non-NULL field of every
+// response DataRow. Matches accumulate per query into
+// “request.response.{pii_count, pii_kinds, rows, bytes}“ on the
+// PolicyRequest envelope — the CEL policy filter reads them in
+// “response.*“ form. Patterns that fail to compile at config-load time
+// are skipped with a warning rather than rejecting the listener, so a
+// single bad regex doesn't take the proxy offline.
+type PostgresProxy_PiiPattern struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Stable label, surfaced in “response.pii_kinds“ and (future) in
+	// “postgres.<prefix>.dam_response_pii_<name>“ metric tags. Defaults to
+	// the regex string if empty.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// RE2 regex (https://github.com/google/re2/wiki/Syntax). Pattern authors
+	// own anchoring / case-insensitivity / etc. — the filter does no
+	// pre-processing.
+	Regex         string `protobuf:"bytes,2,opt,name=regex,proto3" json:"regex,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PostgresProxy_PiiPattern) Reset() {
+	*x = PostgresProxy_PiiPattern{}
+	mi := &file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PostgresProxy_PiiPattern) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PostgresProxy_PiiPattern) ProtoMessage() {}
+
+func (x *PostgresProxy_PiiPattern) ProtoReflect() protoreflect.Message {
+	mi := &file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PostgresProxy_PiiPattern.ProtoReflect.Descriptor instead.
+func (*PostgresProxy_PiiPattern) Descriptor() ([]byte, []int) {
+	return file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescGZIP(), []int{0, 0}
+}
+
+func (x *PostgresProxy_PiiPattern) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *PostgresProxy_PiiPattern) GetRegex() string {
+	if x != nil {
+		return x.Regex
+	}
+	return ""
+}
+
+// KubeDB-DAM column-level masking rules (spec §5.5). When a backend
+// “DataRow“ message arrives, the filter rewrites field values for
+// columns that match a configured rule. v1 supports same-length
+// character replacement only (FULL / PARTIAL) so field bytes can be
+// mutated in place without recomputing the DataRow length header — fast
+// and minimally invasive. Format-preserving / hash / tokenize / nullify
+// masks all require field-length changes and are queued for a follow-up.
+//
+// Column matching is by **name only**, case-insensitive; schema-qualified
+// matching (e.g. “payments.card_number“) is not yet supported.
+//
+// “exempt_roles“ is checked against “request.identity.roles“ from the
+// connection's dynamic metadata under
+// “envoy.filters.network.kubedb_dam_session“ (the K8s/PAM identity
+// enrichment filter). If the session filter isn't deployed, no role
+// matches and every rule applies — the safe default.
+type PostgresProxy_MaskingRule struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Id    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Column names this rule applies to. Compared case-insensitively
+	// against the lower-cased column name from the most recent
+	// “RowDescription“ ('T') message.
+	Columns  []string                       `protobuf:"bytes,2,rep,name=columns,proto3" json:"columns,omitempty"`
+	Type     PostgresProxy_MaskingRule_Type `protobuf:"varint,3,opt,name=type,proto3,enum=envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy_MaskingRule_Type" json:"type,omitempty"`
+	ShowLast uint32                         `protobuf:"varint,4,opt,name=show_last,json=showLast,proto3" json:"show_last,omitempty"`
+	// Single-byte mask character. Defaults to “*“ if empty / multi-byte.
+	MaskChar string `protobuf:"bytes,5,opt,name=mask_char,json=maskChar,proto3" json:"mask_char,omitempty"`
+	// Identities exempt from this rule. Matched against
+	// “request.identity.roles“ from the kubedb_dam_session filter.
+	ExemptRoles   []string `protobuf:"bytes,6,rep,name=exempt_roles,json=exemptRoles,proto3" json:"exempt_roles,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PostgresProxy_MaskingRule) Reset() {
+	*x = PostgresProxy_MaskingRule{}
+	mi := &file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PostgresProxy_MaskingRule) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PostgresProxy_MaskingRule) ProtoMessage() {}
+
+func (x *PostgresProxy_MaskingRule) ProtoReflect() protoreflect.Message {
+	mi := &file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PostgresProxy_MaskingRule.ProtoReflect.Descriptor instead.
+func (*PostgresProxy_MaskingRule) Descriptor() ([]byte, []int) {
+	return file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescGZIP(), []int{0, 1}
+}
+
+func (x *PostgresProxy_MaskingRule) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *PostgresProxy_MaskingRule) GetColumns() []string {
+	if x != nil {
+		return x.Columns
+	}
+	return nil
+}
+
+func (x *PostgresProxy_MaskingRule) GetType() PostgresProxy_MaskingRule_Type {
+	if x != nil {
+		return x.Type
+	}
+	return PostgresProxy_MaskingRule_FULL
+}
+
+func (x *PostgresProxy_MaskingRule) GetShowLast() uint32 {
+	if x != nil {
+		return x.ShowLast
+	}
+	return 0
+}
+
+func (x *PostgresProxy_MaskingRule) GetMaskChar() string {
+	if x != nil {
+		return x.MaskChar
+	}
+	return ""
+}
+
+func (x *PostgresProxy_MaskingRule) GetExemptRoles() []string {
+	if x != nil {
+		return x.ExemptRoles
+	}
+	return nil
+}
+
+var File_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto protoreflect.FileDescriptor
+
+const file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDesc = "" +
 	"\n" +
-	"\x14postgres_proxy.proto\x127envoy.extensions.filters.network.postgres_proxy.v3alpha\x1a\x1egoogle/protobuf/wrappers.proto\x1a#envoy/annotations/deprecation.proto\x1a\x1dudpa/annotations/status.proto\x1a\x17validate/validate.proto\x1a'envoy/config/trace/v3/http_tracer.proto\"\x91\x04\n" +
+	"Tcontrib/envoy/extensions/filters/network/postgres_proxy/v3alpha/postgres_proxy.proto\x127envoy.extensions.filters.network.postgres_proxy.v3alpha\x1a\x1egoogle/protobuf/wrappers.proto\x1a#envoy/annotations/deprecation.proto\x1a\x1dudpa/annotations/status.proto\x1a\x17validate/validate.proto\x1a'envoy/config/trace/v3/http_tracer.proto\"\x8e\v\n" +
 	"\rPostgresProxy\x12(\n" +
 	"\vstat_prefix\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\n" +
 	"statPrefix\x12H\n" +
@@ -216,7 +517,29 @@ const file_postgres_proxy_proto_rawDesc = "" +
 	"\rterminate_ssl\x18\x03 \x01(\bB\v\x92ǆ\xd8\x04\x033.0\x18\x01R\fterminateSsl\x12q\n" +
 	"\fupstream_ssl\x18\x04 \x01(\x0e2N.envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.SSLModeR\vupstreamSsl\x12u\n" +
 	"\x0edownstream_ssl\x18\x05 \x01(\x0e2N.envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.SSLModeR\rdownstreamSsl\x12@\n" +
-	"\taudit_log\x18\x06 \x01(\v2#.envoy.config.trace.v3.Tracing.HttpR\bauditLog\".\n" +
+	"\taudit_log\x18\x06 \x01(\v2#.envoy.config.trace.v3.Tracing.HttpR\bauditLog\x12=\n" +
+	"\x1bblock_decision_metadata_key\x18\a \x01(\tR\x18blockDecisionMetadataKey\x129\n" +
+	"\x14risk_alert_threshold\x18\b \x01(\rB\a\xfaB\x04*\x02\x18dR\x12riskAlertThreshold\x129\n" +
+	"\x14risk_block_threshold\x18\t \x01(\rB\a\xfaB\x04*\x02\x18dR\x12riskBlockThreshold\x12{\n" +
+	"\x10dam_pii_patterns\x18\n" +
+	" \x03(\v2Q.envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.PiiPatternR\x0edamPiiPatterns\x12~\n" +
+	"\x11dam_masking_rules\x18\v \x03(\v2R.envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.MaskingRuleR\x0fdamMaskingRules\x12H\n" +
+	"\x1cdam_dlp_max_hits_per_pattern\x18\f \x01(\rB\t\xfaB\x06*\x04\x18\xff\xff\x03R\x17damDlpMaxHitsPerPattern\x1a?\n" +
+	"\n" +
+	"PiiPattern\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1d\n" +
+	"\x05regex\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x05regex\x1a\xbd\x02\n" +
+	"\vMaskingRule\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x02id\x12\"\n" +
+	"\acolumns\x18\x02 \x03(\tB\b\xfaB\x05\x92\x01\x02\b\x01R\acolumns\x12k\n" +
+	"\x04type\x18\x03 \x01(\x0e2W.envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.MaskingRule.TypeR\x04type\x12\x1b\n" +
+	"\tshow_last\x18\x04 \x01(\rR\bshowLast\x12\x1b\n" +
+	"\tmask_char\x18\x05 \x01(\tR\bmaskChar\x12!\n" +
+	"\fexempt_roles\x18\x06 \x03(\tR\vexemptRoles\"'\n" +
+	"\x04Type\x12\b\n" +
+	"\x04FULL\x10\x00\x12\v\n" +
+	"\aPARTIAL\x10\x01\x12\b\n" +
+	"\x04HASH\x10\x02\".\n" +
 	"\aSSLMode\x12\v\n" +
 	"\aDISABLE\x10\x00\x12\v\n" +
 	"\aREQUIRE\x10\x01\x12\t\n" +
@@ -224,58 +547,66 @@ const file_postgres_proxy_proto_rawDesc = "" +
 	"Eio.envoyproxy.envoy.extensions.filters.network.postgres_proxy.v3alphaB\x12PostgresProxyProtoP\x01Zfgithub.com/envoyproxy/go-control-plane/contrib/envoy/extensions/filters/network/postgres_proxy/v3alphab\x06proto3"
 
 var (
-	file_postgres_proxy_proto_rawDescOnce sync.Once
-	file_postgres_proxy_proto_rawDescData []byte
+	file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescOnce sync.Once
+	file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescData []byte
 )
 
-func file_postgres_proxy_proto_rawDescGZIP() []byte {
-	file_postgres_proxy_proto_rawDescOnce.Do(func() {
-		file_postgres_proxy_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_postgres_proxy_proto_rawDesc), len(file_postgres_proxy_proto_rawDesc)))
+func file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescGZIP() []byte {
+	file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescOnce.Do(func() {
+		file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDesc), len(file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDesc)))
 	})
-	return file_postgres_proxy_proto_rawDescData
+	return file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDescData
 }
 
-var file_postgres_proxy_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_postgres_proxy_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
-var file_postgres_proxy_proto_goTypes = []any{
-	(PostgresProxy_SSLMode)(0),   // 0: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.SSLMode
-	(*PostgresProxy)(nil),        // 1: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy
-	(*wrapperspb.BoolValue)(nil), // 2: google.protobuf.BoolValue
-	(*v3.Tracing_Http)(nil),      // 3: envoy.config.trace.v3.Tracing.Http
+var file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_goTypes = []any{
+	(PostgresProxy_SSLMode)(0),          // 0: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.SSLMode
+	(PostgresProxy_MaskingRule_Type)(0), // 1: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.MaskingRule.Type
+	(*PostgresProxy)(nil),               // 2: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy
+	(*PostgresProxy_PiiPattern)(nil),    // 3: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.PiiPattern
+	(*PostgresProxy_MaskingRule)(nil),   // 4: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.MaskingRule
+	(*wrapperspb.BoolValue)(nil),        // 5: google.protobuf.BoolValue
+	(*v3.Tracing_Http)(nil),             // 6: envoy.config.trace.v3.Tracing.Http
 }
-var file_postgres_proxy_proto_depIdxs = []int32{
-	2, // 0: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.enable_sql_parsing:type_name -> google.protobuf.BoolValue
+var file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_depIdxs = []int32{
+	5, // 0: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.enable_sql_parsing:type_name -> google.protobuf.BoolValue
 	0, // 1: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.upstream_ssl:type_name -> envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.SSLMode
 	0, // 2: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.downstream_ssl:type_name -> envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.SSLMode
-	3, // 3: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.audit_log:type_name -> envoy.config.trace.v3.Tracing.Http
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	6, // 3: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.audit_log:type_name -> envoy.config.trace.v3.Tracing.Http
+	3, // 4: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.dam_pii_patterns:type_name -> envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.PiiPattern
+	4, // 5: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.dam_masking_rules:type_name -> envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.MaskingRule
+	1, // 6: envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.MaskingRule.type:type_name -> envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.MaskingRule.Type
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
-func init() { file_postgres_proxy_proto_init() }
-func file_postgres_proxy_proto_init() {
-	if File_postgres_proxy_proto != nil {
+func init() {
+	file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_init()
+}
+func file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_init() {
+	if File_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_postgres_proxy_proto_rawDesc), len(file_postgres_proxy_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   1,
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDesc), len(file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDesc)),
+			NumEnums:      2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_postgres_proxy_proto_goTypes,
-		DependencyIndexes: file_postgres_proxy_proto_depIdxs,
-		EnumInfos:         file_postgres_proxy_proto_enumTypes,
-		MessageInfos:      file_postgres_proxy_proto_msgTypes,
+		GoTypes:           file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_goTypes,
+		DependencyIndexes: file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_depIdxs,
+		EnumInfos:         file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_enumTypes,
+		MessageInfos:      file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_msgTypes,
 	}.Build()
-	File_postgres_proxy_proto = out.File
-	file_postgres_proxy_proto_goTypes = nil
-	file_postgres_proxy_proto_depIdxs = nil
+	File_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto = out.File
+	file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_goTypes = nil
+	file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_depIdxs = nil
 }

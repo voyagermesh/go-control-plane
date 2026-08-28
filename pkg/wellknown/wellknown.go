@@ -86,6 +86,10 @@ const (
 	OracleProxy = "envoy.filters.network.oracle_proxy"
 	// MSSQLProxy network filter.
 	MSSQLProxy = "envoy.filters.network.mssql_proxy"
+	// KubeDbDamPolicy network filter.
+	KubeDbDamPolicy = "envoy.filters.network.kubedb_dam_policy"
+	// KubeDbDamAudit network filter.
+	KubeDbDamAudit = "envoy.filters.network.kubedb_dam_audit"
 	// ExternalAuthorization network filter.
 	ExternalAuthorization = "envoy.filters.network.ext_authz"
 	// RoleBasedAccessControl network filter.

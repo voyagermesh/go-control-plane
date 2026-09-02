@@ -27,11 +27,10 @@ const (
 type PolicyRule_Action int32
 
 const (
-	// Debug-log only. Decides nothing: a statement whose only match is a LOG
-	// rule is still denied implicitly.
+	// Permit the statement and debug-log the match.
 	PolicyRule_LOG PolicyRule_Action = 0
-	// Emit a counter + stamp the match into dynamic metadata; do not
-	// interfere with the connection. Decides nothing, as LOG.
+	// Permit the statement, emit a counter and stamp the match into dynamic
+	// metadata. Raises attention without interfering with the connection.
 	PolicyRule_ALERT PolicyRule_Action = 1
 	// Drop the connection. Surfaces to the client as the protocol-appropriate
 	// disconnect (Postgres FATAL, MySQL CR_SERVER_LOST, MongoDB
@@ -40,8 +39,8 @@ const (
 	// Beats a matching ALLOW regardless of declared order: a carve-out from an
 	// allowlist must not depend on where somebody put it in the list.
 	PolicyRule_DENY PolicyRule_Action = 2
-	// Permit the statement. Without a matching ALLOW a parsed statement is
-	// denied, so these rules are what a policy actually grants.
+	// Permit the statement, silently. LOG and ALERT permit too; ALLOW is the
+	// one that records nothing, for traffic that is simply expected.
 	PolicyRule_ALLOW PolicyRule_Action = 3
 )
 
@@ -154,24 +153,22 @@ type KubeDbDamPolicy struct {
 	SourceFilterMetadata []string `protobuf:"bytes,1,rep,name=source_filter_metadata,json=sourceFilterMetadata,proto3" json:"source_filter_metadata,omitempty"`
 	// CEL rules, forming an allowlist.
 	//
-	// A parsed statement that no “ALLOW“ rule matches is DENIED. This is the
-	// whole model: the policy states what may happen, and everything else is
-	// refused. There is no field to turn it off, because a rule set that only
-	// says what is forbidden cannot answer "was this permitted".
+	// A parsed statement that matches NO rule is DENIED. This is the whole model:
+	// the policy states what may happen, and everything else is refused. There is
+	// no field to turn it off, because a rule set that only says what is
+	// forbidden cannot answer "was this permitted".
 	//
 	// Precedence is by action, not by position, so a misordered rule cannot
 	// silently open something:
 	//
-	//  1. any matching “DENY“  -> denied
-	//  2. else any matching “ALLOW“ -> permitted
-	//  3. else -> denied, implicitly
+	//  1. any matching “DENY“ -> denied
+	//  2. any other match       -> permitted
+	//  3. no match at all       -> denied, implicitly
 	//
-	// “LOG“ and “ALERT“ are telemetry. They never decide anything, and a
-	// statement matching only those is still denied by (3).
-	//
-	// At least one “ALLOW“ rule is required. A rule set without one permits
-	// nothing at all, which is a configuration mistake rather than a policy, and
-	// the config is rejected at load rather than bricking the database.
+	// Only “DENY“ refuses. “ALLOW“ permits silently, “LOG“ permits and
+	// records, “ALERT“ permits and raises -- so a rule set made entirely of
+	// “LOG“ rules is a valid allowlist: it permits what it logs, and the
+	// implicit rule refuses the rest.
 	Rules []*PolicyRule `protobuf:"bytes,2,rep,name=rules,proto3" json:"rules,omitempty"`
 	// Simulation mode: matches still record metrics and the “simulated_match“
 	// metadata flag, but Deny is not enforced. Safe staging for new rule sets

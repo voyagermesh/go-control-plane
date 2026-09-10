@@ -438,8 +438,13 @@ type PostgresProxy_MaskingRule struct {
 	// Identities exempt from this rule. Matched against the role URI SANs of
 	// the connection's verified client certificate.
 	ExemptRoles []string `protobuf:"bytes,6,rep,name=exempt_roles,json=exemptRoles,proto3" json:"exempt_roles,omitempty"`
-	// Logical databases this rule applies to. Empty means every catalog on
-	// the instance, which is what every rule written before this field meant.
+	// Logical databases this rule applies to. REQUIRED.
+	//
+	// Required rather than optional-meaning-everywhere. A masking rule matches
+	// on a column NAME, and a name is not unique across the databases one
+	// instance serves -- so an unscoped rule masks columns in databases nobody
+	// wrote it for. Making "unscoped" unrepresentable means the listener
+	// refuses such a config at load, rather than over-masking silently.
 	//
 	// Compared case-insensitively against the “database“ parameter of the
 	// client's STARTUP packet -- the same value the DAM envelope publishes as
@@ -451,7 +456,11 @@ type PostgresProxy_MaskingRule struct {
 	// Without it a rule naming “email“ masks that column in every database
 	// the instance serves, including ones the rule was never written about.
 	Catalogs []string `protobuf:"bytes,7,rep,name=catalogs,proto3" json:"catalogs,omitempty"`
-	// Tables this rule applies to. Empty means every table.
+	// Tables this rule applies to. Empty means every table in “catalogs“.
+	//
+	// Optional, unlike “catalogs“: narrowing to a table refines a database
+	// that is already named, so absent here means "the whole database" rather
+	// than "everywhere".
 	//
 	// Entries are SCHEMA-QUALIFIED (“damtest.customers“) and compared
 	// case-insensitively against the tables the in-flight statement
@@ -565,7 +574,7 @@ var File_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgre
 
 const file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postgres_proxy_proto_rawDesc = "" +
 	"\n" +
-	"Tcontrib/envoy/extensions/filters/network/postgres_proxy/v3alpha/postgres_proxy.proto\x127envoy.extensions.filters.network.postgres_proxy.v3alpha\x1a\x1egoogle/protobuf/wrappers.proto\x1a#envoy/annotations/deprecation.proto\x1a\x1dudpa/annotations/status.proto\x1a\x17validate/validate.proto\x1a'envoy/config/trace/v3/http_tracer.proto\"\xc2\v\n" +
+	"Tcontrib/envoy/extensions/filters/network/postgres_proxy/v3alpha/postgres_proxy.proto\x127envoy.extensions.filters.network.postgres_proxy.v3alpha\x1a\x1egoogle/protobuf/wrappers.proto\x1a#envoy/annotations/deprecation.proto\x1a\x1dudpa/annotations/status.proto\x1a\x17validate/validate.proto\x1a'envoy/config/trace/v3/http_tracer.proto\"\xcc\v\n" +
 	"\rPostgresProxy\x12(\n" +
 	"\vstat_prefix\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\n" +
 	"statPrefix\x12H\n" +
@@ -584,15 +593,15 @@ const file_contrib_envoy_extensions_filters_network_postgres_proxy_v3alpha_postg
 	"\n" +
 	"PiiPattern\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1d\n" +
-	"\x05regex\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x05regex\x1a\xf1\x02\n" +
+	"\x05regex\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x05regex\x1a\xfb\x02\n" +
 	"\vMaskingRule\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x02id\x12\"\n" +
 	"\acolumns\x18\x02 \x03(\tB\b\xfaB\x05\x92\x01\x02\b\x01R\acolumns\x12k\n" +
 	"\x04type\x18\x03 \x01(\x0e2W.envoy.extensions.filters.network.postgres_proxy.v3alpha.PostgresProxy.MaskingRule.TypeR\x04type\x12\x1b\n" +
 	"\tshow_last\x18\x04 \x01(\rR\bshowLast\x12\x1b\n" +
 	"\tmask_char\x18\x05 \x01(\tR\bmaskChar\x12!\n" +
-	"\fexempt_roles\x18\x06 \x03(\tR\vexemptRoles\x12\x1a\n" +
-	"\bcatalogs\x18\a \x03(\tR\bcatalogs\x12\x16\n" +
+	"\fexempt_roles\x18\x06 \x03(\tR\vexemptRoles\x12$\n" +
+	"\bcatalogs\x18\a \x03(\tB\b\xfaB\x05\x92\x01\x02\b\x01R\bcatalogs\x12\x16\n" +
 	"\x06tables\x18\b \x03(\tR\x06tables\"'\n" +
 	"\x04Type\x12\b\n" +
 	"\x04FULL\x10\x00\x12\v\n" +

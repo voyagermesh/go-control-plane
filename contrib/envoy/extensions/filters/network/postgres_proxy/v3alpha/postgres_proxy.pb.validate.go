@@ -479,6 +479,17 @@ func (m *PostgresProxy_MaskingRule) validate(all bool) error {
 
 	// no validation rules for MaskChar
 
+	if len(m.GetCatalogs()) < 1 {
+		err := PostgresProxy_MaskingRuleValidationError{
+			field:  "Catalogs",
+			reason: "value must contain at least 1 item(s)",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return PostgresProxy_MaskingRuleMultiError(errors)
 	}

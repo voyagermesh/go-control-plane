@@ -104,6 +104,138 @@ func (m *PostgresProxy) validate(all bool) error {
 
 	// no validation rules for DownstreamSsl
 
+	if all {
+		switch v := interface{}(m.GetAuditLog()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, PostgresProxyValidationError{
+					field:  "AuditLog",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, PostgresProxyValidationError{
+					field:  "AuditLog",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetAuditLog()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PostgresProxyValidationError{
+				field:  "AuditLog",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for BlockDecisionMetadataKey
+
+	if m.GetRiskAlertThreshold() > 100 {
+		err := PostgresProxyValidationError{
+			field:  "RiskAlertThreshold",
+			reason: "value must be less than or equal to 100",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetRiskBlockThreshold() > 100 {
+		err := PostgresProxyValidationError{
+			field:  "RiskBlockThreshold",
+			reason: "value must be less than or equal to 100",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	for idx, item := range m.GetDamPiiPatterns() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, PostgresProxyValidationError{
+						field:  fmt.Sprintf("DamPiiPatterns[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, PostgresProxyValidationError{
+						field:  fmt.Sprintf("DamPiiPatterns[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PostgresProxyValidationError{
+					field:  fmt.Sprintf("DamPiiPatterns[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetDamMaskingRules() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, PostgresProxyValidationError{
+						field:  fmt.Sprintf("DamMaskingRules[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, PostgresProxyValidationError{
+						field:  fmt.Sprintf("DamMaskingRules[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PostgresProxyValidationError{
+					field:  fmt.Sprintf("DamMaskingRules[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if m.GetDamDlpMaxHitsPerPattern() > 65535 {
+		err := PostgresProxyValidationError{
+			field:  "DamDlpMaxHitsPerPattern",
+			reason: "value must be less than or equal to 65535",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return PostgresProxyMultiError(errors)
 	}
@@ -181,3 +313,248 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = PostgresProxyValidationError{}
+
+// Validate checks the field values on PostgresProxy_PiiPattern with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *PostgresProxy_PiiPattern) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PostgresProxy_PiiPattern with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// PostgresProxy_PiiPatternMultiError, or nil if none found.
+func (m *PostgresProxy_PiiPattern) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PostgresProxy_PiiPattern) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Name
+
+	if utf8.RuneCountInString(m.GetRegex()) < 1 {
+		err := PostgresProxy_PiiPatternValidationError{
+			field:  "Regex",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return PostgresProxy_PiiPatternMultiError(errors)
+	}
+
+	return nil
+}
+
+// PostgresProxy_PiiPatternMultiError is an error wrapping multiple validation
+// errors returned by PostgresProxy_PiiPattern.ValidateAll() if the designated
+// constraints aren't met.
+type PostgresProxy_PiiPatternMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PostgresProxy_PiiPatternMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PostgresProxy_PiiPatternMultiError) AllErrors() []error { return m }
+
+// PostgresProxy_PiiPatternValidationError is the validation error returned by
+// PostgresProxy_PiiPattern.Validate if the designated constraints aren't met.
+type PostgresProxy_PiiPatternValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PostgresProxy_PiiPatternValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PostgresProxy_PiiPatternValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PostgresProxy_PiiPatternValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PostgresProxy_PiiPatternValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PostgresProxy_PiiPatternValidationError) ErrorName() string {
+	return "PostgresProxy_PiiPatternValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PostgresProxy_PiiPatternValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPostgresProxy_PiiPattern.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PostgresProxy_PiiPatternValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PostgresProxy_PiiPatternValidationError{}
+
+// Validate checks the field values on PostgresProxy_MaskingRule with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *PostgresProxy_MaskingRule) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PostgresProxy_MaskingRule with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// PostgresProxy_MaskingRuleMultiError, or nil if none found.
+func (m *PostgresProxy_MaskingRule) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PostgresProxy_MaskingRule) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if utf8.RuneCountInString(m.GetId()) < 1 {
+		err := PostgresProxy_MaskingRuleValidationError{
+			field:  "Id",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(m.GetColumns()) < 1 {
+		err := PostgresProxy_MaskingRuleValidationError{
+			field:  "Columns",
+			reason: "value must contain at least 1 item(s)",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for Type
+
+	// no validation rules for ShowLast
+
+	// no validation rules for MaskChar
+
+	if len(errors) > 0 {
+		return PostgresProxy_MaskingRuleMultiError(errors)
+	}
+
+	return nil
+}
+
+// PostgresProxy_MaskingRuleMultiError is an error wrapping multiple validation
+// errors returned by PostgresProxy_MaskingRule.ValidateAll() if the
+// designated constraints aren't met.
+type PostgresProxy_MaskingRuleMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PostgresProxy_MaskingRuleMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PostgresProxy_MaskingRuleMultiError) AllErrors() []error { return m }
+
+// PostgresProxy_MaskingRuleValidationError is the validation error returned by
+// PostgresProxy_MaskingRule.Validate if the designated constraints aren't met.
+type PostgresProxy_MaskingRuleValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PostgresProxy_MaskingRuleValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PostgresProxy_MaskingRuleValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PostgresProxy_MaskingRuleValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PostgresProxy_MaskingRuleValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PostgresProxy_MaskingRuleValidationError) ErrorName() string {
+	return "PostgresProxy_MaskingRuleValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PostgresProxy_MaskingRuleValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPostgresProxy_MaskingRule.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PostgresProxy_MaskingRuleValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PostgresProxy_MaskingRuleValidationError{}

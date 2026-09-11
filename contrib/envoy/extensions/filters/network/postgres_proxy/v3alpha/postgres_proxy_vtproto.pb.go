@@ -9,6 +9,7 @@ package v3alpha
 import (
 	protohelpers "github.com/planetscale/vtprotobuf/protohelpers"
 	wrapperspb "github.com/planetscale/vtprotobuf/types/known/wrapperspb"
+	proto "google.golang.org/protobuf/proto"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
@@ -18,6 +19,206 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+func (m *PostgresProxy_PiiPattern) MarshalVTStrict() (dAtA []byte, err error) {
+	if m == nil {
+		return nil, nil
+	}
+	size := m.SizeVT()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBufferVTStrict(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *PostgresProxy_PiiPattern) MarshalToVTStrict(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVTStrict(dAtA[:size])
+}
+
+func (m *PostgresProxy_PiiPattern) MarshalToSizedBufferVTStrict(dAtA []byte) (int, error) {
+	if m == nil {
+		return 0, nil
+	}
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.unknownFields != nil {
+		i -= len(m.unknownFields)
+		copy(dAtA[i:], m.unknownFields)
+	}
+	if len(m.Regex) > 0 {
+		i -= len(m.Regex)
+		copy(dAtA[i:], m.Regex)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.Regex)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *PostgresProxy_MaskingRule) MarshalVTStrict() (dAtA []byte, err error) {
+	if m == nil {
+		return nil, nil
+	}
+	size := m.SizeVT()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBufferVTStrict(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *PostgresProxy_MaskingRule) MarshalToVTStrict(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVTStrict(dAtA[:size])
+}
+
+func (m *PostgresProxy_MaskingRule) MarshalToSizedBufferVTStrict(dAtA []byte) (int, error) {
+	if m == nil {
+		return 0, nil
+	}
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.unknownFields != nil {
+		i -= len(m.unknownFields)
+		copy(dAtA[i:], m.unknownFields)
+	}
+	if len(m.Tables) > 0 {
+		for iNdEx := len(m.Tables) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Tables[iNdEx])
+			copy(dAtA[i:], m.Tables[iNdEx])
+			i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.Tables[iNdEx])))
+			i--
+			dAtA[i] = 0x42
+		}
+	}
+	if len(m.ExemptRoles) > 0 {
+		for iNdEx := len(m.ExemptRoles) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.ExemptRoles[iNdEx])
+			copy(dAtA[i:], m.ExemptRoles[iNdEx])
+			i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.ExemptRoles[iNdEx])))
+			i--
+			dAtA[i] = 0x32
+		}
+	}
+	if len(m.MaskChar) > 0 {
+		i -= len(m.MaskChar)
+		copy(dAtA[i:], m.MaskChar)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.MaskChar)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.ShowLast != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.ShowLast))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.Type != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.Type))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Columns) > 0 {
+		for iNdEx := len(m.Columns) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Columns[iNdEx])
+			copy(dAtA[i:], m.Columns[iNdEx])
+			i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.Columns[iNdEx])))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *PostgresProxy_DamCatalog) MarshalVTStrict() (dAtA []byte, err error) {
+	if m == nil {
+		return nil, nil
+	}
+	size := m.SizeVT()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBufferVTStrict(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *PostgresProxy_DamCatalog) MarshalToVTStrict(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVTStrict(dAtA[:size])
+}
+
+func (m *PostgresProxy_DamCatalog) MarshalToSizedBufferVTStrict(dAtA []byte) (int, error) {
+	if m == nil {
+		return 0, nil
+	}
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.unknownFields != nil {
+		i -= len(m.unknownFields)
+		copy(dAtA[i:], m.unknownFields)
+	}
+	if m.DlpMaxHitsPerPattern != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.DlpMaxHitsPerPattern))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.PiiPatterns) > 0 {
+		for iNdEx := len(m.PiiPatterns) - 1; iNdEx >= 0; iNdEx-- {
+			size, err := m.PiiPatterns[iNdEx].MarshalToSizedBufferVTStrict(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = protohelpers.EncodeVarint(dAtA, i, uint64(size))
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.MaskingRules) > 0 {
+		for iNdEx := len(m.MaskingRules) - 1; iNdEx >= 0; iNdEx-- {
+			size, err := m.MaskingRules[iNdEx].MarshalToSizedBufferVTStrict(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = protohelpers.EncodeVarint(dAtA, i, uint64(size))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
 
 func (m *PostgresProxy) MarshalVTStrict() (dAtA []byte, err error) {
 	if m == nil {
@@ -48,6 +249,57 @@ func (m *PostgresProxy) MarshalToSizedBufferVTStrict(dAtA []byte) (int, error) {
 	if m.unknownFields != nil {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
+	}
+	if len(m.DamCatalogs) > 0 {
+		for iNdEx := len(m.DamCatalogs) - 1; iNdEx >= 0; iNdEx-- {
+			size, err := m.DamCatalogs[iNdEx].MarshalToSizedBufferVTStrict(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = protohelpers.EncodeVarint(dAtA, i, uint64(size))
+			i--
+			dAtA[i] = 0x6a
+		}
+	}
+	if m.RiskBlockThreshold != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.RiskBlockThreshold))
+		i--
+		dAtA[i] = 0x48
+	}
+	if m.RiskAlertThreshold != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.RiskAlertThreshold))
+		i--
+		dAtA[i] = 0x40
+	}
+	if len(m.BlockDecisionMetadataKey) > 0 {
+		i -= len(m.BlockDecisionMetadataKey)
+		copy(dAtA[i:], m.BlockDecisionMetadataKey)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.BlockDecisionMetadataKey)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.AuditLog != nil {
+		if vtmsg, ok := interface{}(m.AuditLog).(interface {
+			MarshalToSizedBufferVTStrict([]byte) (int, error)
+		}); ok {
+			size, err := vtmsg.MarshalToSizedBufferVTStrict(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = protohelpers.EncodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.AuditLog)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = protohelpers.EncodeVarint(dAtA, i, uint64(len(encoded)))
+		}
+		i--
+		dAtA[i] = 0x32
 	}
 	if m.DownstreamSsl != 0 {
 		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.DownstreamSsl))
@@ -89,6 +341,95 @@ func (m *PostgresProxy) MarshalToSizedBufferVTStrict(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *PostgresProxy_PiiPattern) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	l = len(m.Regex)
+	if l > 0 {
+		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	n += len(m.unknownFields)
+	return n
+}
+
+func (m *PostgresProxy_MaskingRule) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	if len(m.Columns) > 0 {
+		for _, s := range m.Columns {
+			l = len(s)
+			n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+		}
+	}
+	if m.Type != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.Type))
+	}
+	if m.ShowLast != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.ShowLast))
+	}
+	l = len(m.MaskChar)
+	if l > 0 {
+		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	if len(m.ExemptRoles) > 0 {
+		for _, s := range m.ExemptRoles {
+			l = len(s)
+			n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+		}
+	}
+	if len(m.Tables) > 0 {
+		for _, s := range m.Tables {
+			l = len(s)
+			n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+		}
+	}
+	n += len(m.unknownFields)
+	return n
+}
+
+func (m *PostgresProxy_DamCatalog) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	if len(m.MaskingRules) > 0 {
+		for _, e := range m.MaskingRules {
+			l = e.SizeVT()
+			n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+		}
+	}
+	if len(m.PiiPatterns) > 0 {
+		for _, e := range m.PiiPatterns {
+			l = e.SizeVT()
+			n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+		}
+	}
+	if m.DlpMaxHitsPerPattern != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.DlpMaxHitsPerPattern))
+	}
+	n += len(m.unknownFields)
+	return n
+}
+
 func (m *PostgresProxy) SizeVT() (n int) {
 	if m == nil {
 		return 0
@@ -111,6 +452,32 @@ func (m *PostgresProxy) SizeVT() (n int) {
 	}
 	if m.DownstreamSsl != 0 {
 		n += 1 + protohelpers.SizeOfVarint(uint64(m.DownstreamSsl))
+	}
+	if m.AuditLog != nil {
+		if size, ok := interface{}(m.AuditLog).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.AuditLog)
+		}
+		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	l = len(m.BlockDecisionMetadataKey)
+	if l > 0 {
+		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	if m.RiskAlertThreshold != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.RiskAlertThreshold))
+	}
+	if m.RiskBlockThreshold != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.RiskBlockThreshold))
+	}
+	if len(m.DamCatalogs) > 0 {
+		for _, e := range m.DamCatalogs {
+			l = e.SizeVT()
+			n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+		}
 	}
 	n += len(m.unknownFields)
 	return n

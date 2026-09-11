@@ -157,7 +157,7 @@ func (m *PostgresProxy) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	for idx, item := range m.GetDamPiiPatterns() {
+	for idx, item := range m.GetDamCatalogs() {
 		_, _ = idx, item
 
 		if all {
@@ -165,7 +165,7 @@ func (m *PostgresProxy) validate(all bool) error {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
 					errors = append(errors, PostgresProxyValidationError{
-						field:  fmt.Sprintf("DamPiiPatterns[%v]", idx),
+						field:  fmt.Sprintf("DamCatalogs[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
 					})
@@ -173,7 +173,7 @@ func (m *PostgresProxy) validate(all bool) error {
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
 					errors = append(errors, PostgresProxyValidationError{
-						field:  fmt.Sprintf("DamPiiPatterns[%v]", idx),
+						field:  fmt.Sprintf("DamCatalogs[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
 					})
@@ -182,58 +182,13 @@ func (m *PostgresProxy) validate(all bool) error {
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return PostgresProxyValidationError{
-					field:  fmt.Sprintf("DamPiiPatterns[%v]", idx),
+					field:  fmt.Sprintf("DamCatalogs[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
 			}
 		}
 
-	}
-
-	for idx, item := range m.GetDamMaskingRules() {
-		_, _ = idx, item
-
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, PostgresProxyValidationError{
-						field:  fmt.Sprintf("DamMaskingRules[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, PostgresProxyValidationError{
-						field:  fmt.Sprintf("DamMaskingRules[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return PostgresProxyValidationError{
-					field:  fmt.Sprintf("DamMaskingRules[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	if m.GetDamDlpMaxHitsPerPattern() > 65535 {
-		err := PostgresProxyValidationError{
-			field:  "DamDlpMaxHitsPerPattern",
-			reason: "value must be less than or equal to 65535",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
 	}
 
 	if len(errors) > 0 {
@@ -479,17 +434,6 @@ func (m *PostgresProxy_MaskingRule) validate(all bool) error {
 
 	// no validation rules for MaskChar
 
-	if len(m.GetCatalogs()) < 1 {
-		err := PostgresProxy_MaskingRuleValidationError{
-			field:  "Catalogs",
-			reason: "value must contain at least 1 item(s)",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
 	if len(errors) > 0 {
 		return PostgresProxy_MaskingRuleMultiError(errors)
 	}
@@ -569,3 +513,195 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = PostgresProxy_MaskingRuleValidationError{}
+
+// Validate checks the field values on PostgresProxy_DamCatalog with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *PostgresProxy_DamCatalog) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PostgresProxy_DamCatalog with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// PostgresProxy_DamCatalogMultiError, or nil if none found.
+func (m *PostgresProxy_DamCatalog) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PostgresProxy_DamCatalog) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if utf8.RuneCountInString(m.GetName()) < 1 {
+		err := PostgresProxy_DamCatalogValidationError{
+			field:  "Name",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	for idx, item := range m.GetMaskingRules() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, PostgresProxy_DamCatalogValidationError{
+						field:  fmt.Sprintf("MaskingRules[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, PostgresProxy_DamCatalogValidationError{
+						field:  fmt.Sprintf("MaskingRules[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PostgresProxy_DamCatalogValidationError{
+					field:  fmt.Sprintf("MaskingRules[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetPiiPatterns() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, PostgresProxy_DamCatalogValidationError{
+						field:  fmt.Sprintf("PiiPatterns[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, PostgresProxy_DamCatalogValidationError{
+						field:  fmt.Sprintf("PiiPatterns[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PostgresProxy_DamCatalogValidationError{
+					field:  fmt.Sprintf("PiiPatterns[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if m.GetDlpMaxHitsPerPattern() > 65535 {
+		err := PostgresProxy_DamCatalogValidationError{
+			field:  "DlpMaxHitsPerPattern",
+			reason: "value must be less than or equal to 65535",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return PostgresProxy_DamCatalogMultiError(errors)
+	}
+
+	return nil
+}
+
+// PostgresProxy_DamCatalogMultiError is an error wrapping multiple validation
+// errors returned by PostgresProxy_DamCatalog.ValidateAll() if the designated
+// constraints aren't met.
+type PostgresProxy_DamCatalogMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PostgresProxy_DamCatalogMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PostgresProxy_DamCatalogMultiError) AllErrors() []error { return m }
+
+// PostgresProxy_DamCatalogValidationError is the validation error returned by
+// PostgresProxy_DamCatalog.Validate if the designated constraints aren't met.
+type PostgresProxy_DamCatalogValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PostgresProxy_DamCatalogValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PostgresProxy_DamCatalogValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PostgresProxy_DamCatalogValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PostgresProxy_DamCatalogValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PostgresProxy_DamCatalogValidationError) ErrorName() string {
+	return "PostgresProxy_DamCatalogValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PostgresProxy_DamCatalogValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPostgresProxy_DamCatalog.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PostgresProxy_DamCatalogValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PostgresProxy_DamCatalogValidationError{}
